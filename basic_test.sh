@@ -1,34 +1,35 @@
 #!/bin/bash
 
-CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CURR_DIR=`pwd`
 
-source $CURR_DIR/test_config.properties
+source $PWD/test_config.properties
 
-function startTest()
-{
-    TEST_INFO="$1"
-    echo " =========================================================================================="
-    echo " TEST EXECUTION START:   >>>>>>     ${TEST_INFO}      <<<<<<"
-    echo " =========================================================================================="
-}
-
-function endTest()
-{
-    TEST_INFO="$1"
-    echo " =========================================================================================="
-    echo " TEST EXECUTION END :    >>>>>>     ${TEST_INFO}      <<<<<<"
-    echo " =========================================================================================="
-}
 
 function getHostInfo()
 {
     hostnamectl
 }
 
-function checkWLSInstallation()
+function startTest()
 {
+    TEST_INFO="$1"
+    echo "\n\n"
+    echo " =========================================================================================="
+    echo " EXECUTION START:  TEST >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
+}
 
-    startTest "checkWLSInstallation"
+function endTest()
+{
+    TEST_INFO="$1"
+    echo " EXECUTION END :    TEST >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
+    echo " =========================================================================================="
+    echo "\n\n"
+}
+
+
+function testWLSInstallPath()
+{
+    startTest "testWLSInstallPath"
 
     if [ ! -d "${WLS_HOME}" ]; then
       echo "Weblogic Server not installed as per the expected directory structure"
@@ -36,6 +37,14 @@ function checkWLSInstallation()
       echo "Weblogic Server install path verified successfully"
     fi
 
+    endTest "testWLSInstallation"
+
+}
+
+function testWLSVersion()
+{
+    startTest "testWLSInstallPath"
+    
     cd ${WLS_HOME}/server/bin
 
     . ./setWLSEnv.sh
@@ -47,18 +56,18 @@ function checkWLSInstallation()
 
     if [ "$?" != "0" ];
     then
-       echo "Error !! Weblogic Server Version could not be verified "    
+       echo "FAILURE - Weblogic Server Version could not be verified "    
     else
-       echo "Success !! Weblogic Server Version verified successfully"
+       echo "SUCCESS - Weblogic Server Version verified successfully"
     fi
 
-    endTest "checkWLSInstallation"
+    endTest "testWLSInstallPath"
 
 }
 
-function checkJavaInstallation()
+function testJavaInstallation()
 {
-    startTest "checkJavaInstallation"
+    startTest "testJavaInstallation"
 
      if type -p java; then
         echo found java executable in PATH
@@ -79,15 +88,15 @@ function checkJavaInstallation()
 
     if [ "$?" != "0" ];
     then
-       echo "Error !! Java Version could not be verified "    
+       echo "FAILURE - Java Version could not be verified "    
     else
-       echo "Success !! Java Server Version verified successfully"
+       echo "SUCCESS - Java Server Version verified successfully"
     fi
 
-    endTest "checkJavaInstallation"
+    endTest "testJavaInstallation"
 }
 
-function checkDomainSetup()
+function testDomainSetup()
 {
 
     if [ ! -d "${DOMAIN_DIR}" ]; then
@@ -97,29 +106,40 @@ function checkDomainSetup()
 }
 
 
-function checkJDBCDrivers()
+function testJDBCDrivers()
 {
+
+    startTest "testJavaInstallation"
+
+    cd ${WLS_HOME}/server/bin
+
+    . ./setWLSEnv.sh
+  
     echo ${CLASSPATH}
 
     echo ${CLASSPATH} | grep "${POSTGRESQL_JAR}"
 
     if [ $? == 1 ];
     then
-        echo "${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
+    else
+        echo "SUCCESS - ${POSTGRESQL_JAR} file found in Weblogic Classpath as expected"
     fi
 
     echo $CLASSPATH|grep "${MSSQL_JAR}"
 
     if [ $? == 1 ];
     then
-        echo "${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
+    else
+        echo "SUCCESS - ${MSSQL_JAR} file found in Weblogic Classpath as expected"
     fi
 
-
+    endTest "testJavaInstallation"
 }
 
 
-function checkAdminConsoleHTTP()
+function testAdminConsoleHTTP()
 {
     retcode=$(curl -s -o /dev/null -w "%{http_code}" ${HTTP_ADMIN_URL} )
 
@@ -129,7 +149,7 @@ function checkAdminConsoleHTTP()
     fi
 }
 
-function checkAdminConsoleHTTPS()
+function testAdminConsoleHTTPS()
 {
     retcode=$(curl --insecure -s -o /dev/null -w "%{http_code}" ${HTTPS_ADMIN_URL})
 
@@ -150,7 +170,7 @@ function getServerStatus()
 
 }
 
-function checkAppDeployment()
+function testAppDeployment()
 {
     curl -v \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
@@ -172,18 +192,18 @@ function checkAppDeployment()
 
 getHostInfo
 
-checkWLSInstallation
+testWLSInstallation
 
-checkJavaInstallation
+testJavaInstallation
 
-#checkJDBCDrivers
+testJDBCDrivers
 
-#checkDomainSetup
+#testDomainSetup
 
-#checkAdminConsoleHTTP
+#testAdminConsoleHTTP
 
-#checkAdminConsoleHTTPS
+#testAdminConsoleHTTPS
 
-#checkServerStatus
+#testServerStatus
 
-#checkAppDeployment
+#testAppDeployment

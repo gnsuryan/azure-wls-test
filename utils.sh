@@ -62,3 +62,32 @@ function isUtilityInstalled()
 
     endTest
 }
+
+
+function testWDTInstallation()
+{
+
+    if [ ! -d "$WDT_HOME" ];
+    then
+        echo "FAILURE: Weblogic Deploy Tool not found"
+        notifyFail
+        endTest
+        return
+    else
+        echo "SUCCESS: Weblogic Deploy Tool found"
+        notifyPass
+        
+        $WDT_HOME/bin/createDomain.sh
+
+        if [ "$?" != "0" ];
+        then
+            echo "FAILURE: Failed to verify Deploy Tool"
+            notifyFail
+        else
+            echo "SUCCESS: Deploy tool verified successfully"
+            notifyPass
+        fi
+    fi
+
+    endTest    
+}

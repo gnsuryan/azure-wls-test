@@ -148,6 +148,7 @@ function testAppDeployment()
         notifyPass
 
         if [ "${retcode}" != "202" ];
+        then
             echo "Deployment in progress. Wait for 1 minute for deployment to complete."
             sleep 60s
         fi

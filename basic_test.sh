@@ -125,7 +125,7 @@ function testJDBCDrivers()
 
     startTest
 
-    if [ ! -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR} ];
+    if [ ! -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR}" ];
     then
         echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
         notifyFail
@@ -134,7 +134,7 @@ function testJDBCDrivers()
         notifyPass
     fi
 
-    if [ ! -f "${WLS_HOME}/server/lib/${MSSQL_JAR} ];
+    if [ ! -f "${WLS_HOME}/server/lib/${MSSQL_JAR}" ];
     then
         echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
         notifyFail

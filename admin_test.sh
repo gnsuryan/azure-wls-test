@@ -32,10 +32,10 @@ function testWLSDomainPath()
 {
     startTest
 
-    echo "DOMAIN_DIR: ${DOMAIN_DIR}"
+    echo "DOMAIN_DIR: ${ADMIN_DOMAIN_DIR}"
 
-    if [ ! -d "${DOMAIN_DIR}" ]; then
-      echo "Weblogic Server Domain directory not setup as per the expected directory structure: ${WLS_HOME} "
+    if [ ! -d "${ADMIN_DOMAIN_DIR}" ]; then
+      echo "Weblogic Server Domain directory not setup as per the expected directory structure: ${ADMIN_DOMAIN_DIR} "
       notifyFail
     else
       echo "Weblogic Server Domain path verified successfully"
@@ -139,15 +139,18 @@ function testAppDeployment()
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
-    echo "$retcode"
-
-    if [ "${retcode}" != "201" ];
+    if [ "${retcode}" != "201" -o "${retcode}" != "202" ];
     then
         echo "Error!! App Deployment Failed. Curl returned code ${retcode}"
         notifyFail
     else
         echo "SUCCESS: App Deployed Successfully. Curl returned code ${retcode}"
         notifyPass
+
+        if [ "${retcode}" != "202" ];
+            echo "Deployment in progress. Wait for 1 minute for deployment to complete."
+            sleep 60s
+        fi
     fi
 
     endTest
@@ -230,4 +233,6 @@ testDeployedAppHTTPS
 verifyAdminSystemService
 
 printTestSummary
+
+
 

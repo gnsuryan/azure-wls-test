@@ -125,11 +125,30 @@ function testJDBCDrivers()
 
     startTest
 
+    if [ ! -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR} ];
+    then
+        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        notifyFail
+    else
+        echo "SUCCESS - ${POSTGRESQL_JAR) file is found in Weblogic Server lib directory as expected"
+        notifyPass
+    fi
+
+    if [ ! -f "${WLS_HOME}/server/lib/${MSSQL_JAR} ];
+    then
+        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        notifyFail
+    else
+        echo "SUCCESS - ${MSSQL_JAR) file is found in Weblogic Server lib directory as expected"
+        notifyPass
+    fi
+  
+    
     cd ${WLS_HOME}/server/bin
 
     . ./setWLSEnv.sh >/dev/null
   
-    echo ${CLASSPATH} | grep "${POSTGRESQL_JAR}"
+    echo ${WEBLOGIC_CLASSPATH} | grep "${POSTGRESQL_JAR}"
 
     if [ $? == 1 ];
     then
@@ -142,7 +161,7 @@ function testJDBCDrivers()
 
     echo "==========================================================================="
 
-    echo $CLASSPATH|grep "${MSSQL_JAR}"
+    echo ${WEBLOGIC_CLASSPATH} | grep "${MSSQL_JAR}"
 
     if [ $? == 1 ];
     then

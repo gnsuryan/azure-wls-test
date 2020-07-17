@@ -125,25 +125,24 @@ function testJDBCDrivers()
 
     startTest
 
-    if [ ! -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR}" ];
+    if [[ -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR}" ]];
     then
-        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
-        notifyFail
-    else
-        echo "SUCCESS - ${POSTGRESQL_JAR) file is found in Weblogic Server lib directory as expected"
+        echo "SUCCESS: ${POSTGRESQL_JAR} file is found in Weblogic Server lib directory as expected"
         notifyPass
+    else
+        echo "FAILURE: ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        notifyFail
     fi
 
-    if [ ! -f "${WLS_HOME}/server/lib/${MSSQL_JAR}" ];
+    if [[ -f "${WLS_HOME}/server/lib/${MSSQL_JAR}" ]];
     then
-        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
-        notifyFail
-    else
-        echo "SUCCESS - ${MSSQL_JAR) file is found in Weblogic Server lib directory as expected"
+        echo "SUCCESS: ${MSSQL_JAR} file is found in Weblogic Server lib directory as expected"
         notifyPass
+    else
+        echo "FAILURE: ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        notifyFail
     fi
   
-    
     cd ${WLS_HOME}/server/bin
 
     . ./setWLSEnv.sh >/dev/null
@@ -152,10 +151,10 @@ function testJDBCDrivers()
 
     if [ $? == 1 ];
     then
-        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE: ${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
         notifyFail
     else
-        echo "SUCCESS - ${POSTGRESQL_JAR} file found in Weblogic Classpath as expected"
+        echo "SUCCESS: ${POSTGRESQL_JAR} file found in Weblogic Classpath as expected"
         notifyPass
     fi
 
@@ -165,10 +164,10 @@ function testJDBCDrivers()
 
     if [ $? == 1 ];
     then
-        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE: ${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
         notifyFail
     else
-        echo "SUCCESS - ${MSSQL_JAR} file found in Weblogic Classpath as expected"
+        echo "SUCCESS: ${MSSQL_JAR} file found in Weblogic Classpath as expected"
         notifyPass
     fi
 

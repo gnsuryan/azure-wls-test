@@ -1,9 +1,13 @@
+#!/bin/bash
+
+checkIfAdminServerIsRunning()
+{
+  
+}
+
+
 # Set environment.
-export MW_HOME=/u01/app/wls/install/oracle/middleware
-export WLS_HOME=/u01/app/wls/install/oracle/middleware/oracle_home/wlserver
-export WL_HOME=$WLS_HOME
-export PATH=$JAVA_HOME/bin:$PATH
-export CONFIG_JVM_ARGS=-Djava.security.egd=file:/dev/./urandom
+source $PWD/domain.properties
 
 . $WLS_HOME/server/bin/setWLSEnv.sh
 
@@ -15,3 +19,20 @@ java weblogic.version
 
 # Create the domain.
 java weblogic.WLST create_domain.py -p domain.properties
+
+DOMAIN_DIR=${path.domain.config}/${domain.name}
+
+mkdir -p ${DOMAIN_DIR}/AdminServer/security
+
+cd ${DOMAIN_DIR}/AdminServer/security
+
+cat <<EOF> ${DOMAIN_DIR}/AdminServer/security/boot.properties
+username=${domain.username}
+password=${domain.password}
+EOF
+
+cd ${DOMAIN_DIR}
+
+./startWebLogic.sh &
+
+checkIfAdminServerIsRunning

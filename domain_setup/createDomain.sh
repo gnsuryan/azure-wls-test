@@ -2,8 +2,7 @@
 
 checkIfAdminServerIsRunning()
 {
-   echo "======= checking WLServer Availability ========"
-  serverhost=`hostname -f`
+  echo "======= checking WLServer Availability ========"
   url="http://${ADMIN_SERVER_HOST}:${ADMIN_PORT}/console"
   count=0
 
@@ -15,16 +14,16 @@ checkIfAdminServerIsRunning()
 
        if [ $status -eq 200 ]; then
             echo "Weblogic Admin Server is up and running. "
-            return 1
+            exit 0
        else
             sleep 10
             if [ $count -gt 10 ]; then
-             echo "Failed to connect to Weblogic Admin Server even after 40 attempts: Check if the Server is running or not";
+             echo "Failed to connect to Weblogic Admin Server even after 10 attempts: Check if the Server is running or not";
              break;
             fi
        fi
   done
-  return 0
+  exit 1
 
 }
 
@@ -42,24 +41,18 @@ java weblogic.version
 # Create the domain.
 java weblogic.WLST create_domain.py -p $CURR_DIR/domain.properties
 
-DOMAIN_DIR=${path.domain.config}/${domain.name}
+mkdir -p ${DOMAIN_DIR}/servers/AdminServer/security
 
-mkdir -p ${DOMAIN_DIR}/AdminServer/security
-
-cd ${DOMAIN_DIR}/AdminServer/security
-
-cat <<EOF> ${DOMAIN_DIR}/AdminServer/security/boot.properties
+cat <<EOF> ${DOMAIN_DIR}/servers/AdminServer/security/boot.properties
 username=${USERNAME}
 password=${PASSWORD}
 EOF
 
 cd ${DOMAIN_DIR}
-
 ./startWebLogic.sh &
 
 cd ${CURR_DIR}
-
-retcode=$(checkIfAdminServerIsRunning)
+checkIfAdminServerIsRunning
 
 if [ "$retcode" == "1" ]
 then

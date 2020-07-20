@@ -27,15 +27,14 @@ configProps = Properties()
 configProps.load(propInputStream)
 
 # Set all variables from values in properties file.
-wlsPath=configProps.get("path.wls")
-domainConfigPath=configProps.get("path.domain.config")
-appConfigPath=configProps.get("path.app.config")
-domainName=configProps.get("domain.name")
-username=configProps.get("domain.username")
-password=configProps.get("domain.password")
-adminPort=configProps.get("domain.admin.port")
-adminAddress=configProps.get("domain.admin.address")
-adminPortSSL=configProps.get("domain.admin.port.ssl")
+wlsPath=configProps.get("WLS_HOME")
+domainConfigPath=configProps.get("DOMAIN_PATH")
+domainName=configProps.get("DOMAIN_NAME")
+username=configProps.get("USERNAME")
+password=configProps.get("PASSWORD")
+adminPort=configProps.get("ADMIN_PORT")
+adminAddress=configProps.get("ADMIN_SERVER_HOST")
+adminPortSSL=configProps.get("ADMIN_PORT_SSL")
 
 # Display the variable values.
 print 'wlsPath=', wlsPath

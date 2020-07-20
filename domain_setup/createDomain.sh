@@ -4,7 +4,7 @@ checkIfAdminServerIsRunning()
 {
    echo "======= checking WLServer Availability ========"
   serverhost=`hostname -f`
-  url="http://${ADMIN_SERVER_HOST}:${ADMIN_SERVER_PORT}/console"
+  url="http://${ADMIN_SERVER_HOST}:${ADMIN_PORT}/console"
   count=0
 
   while :

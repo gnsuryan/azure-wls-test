@@ -1,6 +1,4 @@
 #!/usr/bin/python
-# Author : Tim Hall
-# Save Script as : create_domain.py
 import time
 import getopt
 import sys

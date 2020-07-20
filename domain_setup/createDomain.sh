@@ -28,9 +28,8 @@ checkIfAdminServerIsRunning()
 
 }
 
-
-# Set environment.
-source $PWD/domain.properties
+CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source $CURR_DIR/domain.properties
 
 . $WLS_HOME/server/bin/setWLSEnv.sh
 
@@ -41,19 +40,29 @@ java -version
 java weblogic.version
 
 # Create the domain.
-java weblogic.WLST create_domain.py -p domain.properties
+java weblogic.WLST create_domain.py -p $CURR_DIR/domain.properties
+
+DOMAIN_DIR=${path.domain.config}/${domain.name}
 
 mkdir -p ${DOMAIN_DIR}/AdminServer/security
 
 cd ${DOMAIN_DIR}/AdminServer/security
 
 cat <<EOF> ${DOMAIN_DIR}/AdminServer/security/boot.properties
-username=${domain.username}
-password=${domain.password}
+username=${USERNAME}
+password=${PASSWORD}
 EOF
 
 cd ${DOMAIN_DIR}
 
 ./startWebLogic.sh &
 
-checkIfAdminServerIsRunning
+cd ${CURR_DIR}
+
+retcode=$(checkIfAdminServerIsRunning)
+
+if [ "$retcode" == "1" ]
+then
+   echo "Failed to start WebLogic Administration Server."
+   exit 1
+fi

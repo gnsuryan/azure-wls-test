@@ -2,10 +2,46 @@
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-source $CURR_DIR/test_config.properties
+usage()
+{
+cat << USAGE >&2
+Usage:
+    -inputfile    INPUT_FILE        Path to Command input File
+    -h|?|--help   HELP              Help/Usage info
+USAGE
 
-export passcount=0
-export failcount=0
+exit 1
+}
+
+get_param()
+{
+    while [ "$1" ]
+    do
+        case $1 in
+         -inputfile )  INPUT_FILE=$2 ;;
+                   *)  echo 'invalid arguments specified'
+                       usage;;
+        esac
+        shift 2
+    done
+}
+
+validate_input()
+{
+    if [ -z "$INPUT_FILE" ];
+    then
+        echo "command input file not provided"
+        usage;
+    fi
+
+    if [[ ! -f "$INPUT_FILE" ]];
+    then
+        echo "Provided input file provided not found"
+        exit 1
+    fi
+    
+    source $CURR_DIR/INPUT_FILE
+}
 
 function notifyPass()
 {
@@ -91,3 +127,6 @@ function testWDTInstallation()
 
     endTest    
 }
+
+export passcount=0
+export failcount=0

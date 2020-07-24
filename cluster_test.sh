@@ -411,21 +411,21 @@ validate_input
 
 testManagedServerStatus "RUNNING"
 
-#getClusterName
+getClusterName
 
-#testAppDeployment
+testAppDeployment
 
-#testDeployedAppHTTP
+testDeployedAppHTTP
 
-#testDeployedAppHTTPS
+testDeployedAppHTTPS
 
-shutdownAllServers
+#shutdownAllServers
 
-testManagedServerStatus "SHUTDOWN"
+#testManagedServerStatus "SHUTDOWN"
 
-startAllServers
+#startAllServers
 
-testManagedServerStatus "RUNNING"
+#testManagedServerStatus "RUNNING"
 
 #verifyManagedServerSystemService
 

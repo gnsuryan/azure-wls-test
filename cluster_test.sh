@@ -76,10 +76,9 @@ function shutdownServer()
         echo "FAILURE: Server $serverName not shutdown as expected."
         notifyFail
     else
-        isServerRunning "$serverName" "SHUTDOWN"
+        echo "SUCCESS: Server $serverName shutdown as expected."
+        notifyPass
     fi
-
-    echo "Shut down Server : $serverName Successful"
 }
 
 function startServer()
@@ -105,7 +104,8 @@ function startServer()
         echo "FAILURE: Server $serverName not started as expected."
         notifyFail
     else
-        isServerShutdown "$serverName" "RUNNING"
+        echo "SUCCESS: Server $serverName started as expected."
+        notifyPass
     fi
 
     echo "Shut down Server : $serverName Successful"
@@ -122,9 +122,7 @@ function shutdownAllServers()
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name)
 
-    echo $output
-
-    sleep 30s
+    #echo $output
 
     managedServers="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .name')"
     managedServers="$(echo $managedServers| tr '\n' ' ')"
@@ -136,11 +134,9 @@ function shutdownAllServers()
 
     for i in "${!managedServerArray[@]}"; 
     do
-        serverName="${managedServerArray[$i]}"
-        
+        serverName="${managedServerArray[$i]}"        
         shutdownServer $serverName
-
-        sleep 30s
+        sleep 5s
     done
 
 }
@@ -157,7 +153,7 @@ function startAllServers()
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name)
 
-    echo $output
+    #echo $output
 
     managedServers="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .name')"
     managedServers="$(echo $managedServers| tr '\n' ' ')"
@@ -171,6 +167,7 @@ function startAllServers()
     do
         serverName="${managedServerArray[$i]}"
         startServer $serverName
+        sleep 5s
     done
 }
 
@@ -252,7 +249,7 @@ function testManagedServerStatus()
         then
           isServerRunning "$serverName" "$serverStatus"
         else
-          if [ "$expectedStatus" == "SHUTODWN" ];
+          if [ "$expectedStatus" == "SHUTDOWN" ];
           then
               isServerShutdown "$serverName" "$serverStatus"
           fi
@@ -365,24 +362,6 @@ function testDeployedAppHTTP()
 }
 
 
-function testDeployedAppHTTPS()
-{
-    startTest
-
-    retcode=$(curl --insecure -L -s -o /dev/null -w "%{http_code}" ${HTTPS_SHOPPING_CART_APP_URL} )
-
-    if [ "${retcode}" != "200" ];
-    then
-        echo "FAILURE: Deployed App is not accessible. Curl returned code ${retcode}"
-        notifyFail
-    else
-        echo "SUCCESS: Deployed App is accessible. Curl returned code ${retcode}"
-        notifyPass
-    fi
-
-    endTest
-}
-
 #main
 
 get_param "$@"
@@ -397,14 +376,12 @@ testAppDeployment
 
 testDeployedAppHTTP
 
-testDeployedAppHTTPS
+shutdownAllServers
 
-#shutdownAllServers
+testManagedServerStatus "SHUTDOWN"
 
-#testManagedServerStatus "SHUTDOWN"
+startAllServers
 
-#startAllServers
-
-#testManagedServerStatus "RUNNING"
+testManagedServerStatus "RUNNING"
 
 printTestSummary

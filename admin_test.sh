@@ -86,7 +86,7 @@ function testServerStatus()
 {
     startTest
 
-    output=$(curl -v \
+    output=$(curl -s -v \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -94,29 +94,10 @@ function testServerStatus()
 
     echo $output
 
-    adminServerStatus=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name == $ADMIN_NAME) | .state ')
+    adminServerStatus=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name | test($ADMIN_NAME;"i")) | .state ')
     echo "Admin Server Status: $adminServerStatus"
 
     isServerRunning "AdminServer" "$adminServerStatus"
-
-    echo "MANAGED_SERVER_PREFIX: $MANAGED_SERVER_PREFIX"
-
-    managedServer="$(echo $output | jq -r --arg MS_PREFIX "$MANAGED_SERVER_PREFIX" '.items[]|select(.name| startswith($MS_PREFIX))|.name')"
-    managedServerStatus="$(echo $output | jq -r --arg MS_PREFIX "$MANAGED_SERVER_PREFIX" '.items[]|select(.name| startswith($MS_PREFIX))|.state')"
-
-    managedServer=$(echo $managedServer)
-    managedServerStatus=$(echo $managedServerStatus)
-
-    IFS=' '
-    read -a managedServerArray <<< "$managedServer"
-    read -a managedServerStatusArray <<< "$managedServerStatus"
-
-    for i in "${!managedServerArray[@]}"; 
-    do
-        serverName="${managedServerArray[$i]}"
-        serverStatus="${managedServerStatusArray[$i]}"
-        isServerRunning "$serverName" "$serverStatus"
-    done
 
     endTest
 }
@@ -125,36 +106,47 @@ function testAppDeployment()
 {
     startTest
 
+    output=$(curl -s -v \
+    --user ${WLS_USERNAME}:${WLS_PASSWORD} \
+    -H X-Requested-By:MyClient \
+    -H Accept:application/json \
+    -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name,state)
+
+    adminServerName=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name | test($ADMIN_NAME;"i")) | .name ')
+
+    echo "Deploying to: $adminServerName"
     echo "DEPLOY_APP_PATH: $DEPLOY_APP_PATH"
 
-    retcode=$(curl -v -s -o /dev/null -w "%{http_code}" \
+    retcode=$(curl -v -s \
             --user ${WLS_USERNAME}:${WLS_PASSWORD} \
             -H X-Requested-By:MyClient \
             -H Accept:application/json \
             -H Content-Type:application/json \
             -d "{
-                name: '${SHOPPING_APP_NAME}',
-                deploymentPath: '${SHOPPING_APP_PATH}',
-                targets: [ '${ADMIN_SERVER_NAME}' ]
+                name: '${SHOPPING_CART_APP_NAME}',
+                deploymentPath: '${SHOPPING_CART_APP_PATH}',
+                targets: [ '${adminServerName}' ]
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
-    if [ "${retcode}" != "201" -o "${retcode}" != "202" ];
+    echo "$retcode"
+
+    deploymentStatus="$(echo $retcode | jq -r '.messages[]|.severity')"
+    
+    if [ "${deploymentStatus}" != "SUCCESS" ];
     then
-        echo "Error!! App Deployment Failed. Curl returned code ${retcode}"
+        echo "Error!! App Deployment Failed. Deployment Status: ${deploymentStatus}"
         notifyFail
     else
-        echo "SUCCESS: App Deployed Successfully. Curl returned code ${retcode}"
+        echo "SUCCESS: App Deployed Successfully. Deployment Status: ${deploymentStatus}"
         notifyPass
-
-        if [ "${retcode}" != "202" ];
-        then
-            echo "Deployment in progress. Wait for 1 minute for deployment to complete."
-            sleep 60s
-        fi
     fi
 
     endTest
+
+    echo "Wait for 30 seconds for the deployed Apps to become available..."
+    sleep 30s
+
 }
 
 
@@ -162,7 +154,7 @@ function testDeployedAppHTTP()
 {
     startTest
 
-    retcode=$(curl -L -s -o /dev/null -w "%{http_code}" ${HTTP_SHOPPING_APP_URL} )
+    retcode=$(curl -L -s -o /dev/null -w "%{http_code}" ${ADMIN_HTTP_SHOPPING_CART_APP_URL} )
 
     if [ "${retcode}" != "200" ];
     then
@@ -181,7 +173,7 @@ function testDeployedAppHTTPS()
 {
     startTest
 
-    retcode=$(curl --insecure -L -s -o /dev/null -w "%{http_code}" ${HTTPS_SHOPPING_APP_URL} )
+    retcode=$(curl --insecure -L -s -o /dev/null -w "%{http_code}" ${ADMIN_HTTPS_SHOPPING_CART_APP_URL} )
 
     if [ "${retcode}" != "200" ];
     then
@@ -217,6 +209,10 @@ function verifyAdminSystemService()
 
 #main
 
+get_param "$@"
+
+validate_input
+
 testWLSDomainPath
 
 testAdminConsoleHTTP
@@ -234,6 +230,3 @@ testDeployedAppHTTPS
 verifyAdminSystemService
 
 printTestSummary
-
-
-

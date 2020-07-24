@@ -6,7 +6,7 @@ usage()
 {
 cat << USAGE >&2
 Usage:
-    -inputfile    INPUT_FILE        Path to Command input File
+    -i            INPUT_FILE        Path to Command input File
     -h|?|--help   HELP              Help/Usage info
 USAGE
 
@@ -18,7 +18,7 @@ get_param()
     while [ "$1" ]
     do
         case $1 in
-         -inputfile )  INPUT_FILE=$2 ;;
+         -i         )  INPUT_FILE=$2 ;;
                    *)  echo 'invalid arguments specified'
                        usage;;
         esac
@@ -36,11 +36,12 @@ validate_input()
 
     if [[ ! -f "$INPUT_FILE" ]];
     then
-        echo "Provided input file provided not found"
+        echo "Provided input file ${INPUT_FILE} not found"
         exit 1
     fi
-    
-    source $CURR_DIR/INPUT_FILE
+   
+    echo "Using input file $INPUT_FILE"
+    source $INPUT_FILE
 }
 
 function notifyPass()

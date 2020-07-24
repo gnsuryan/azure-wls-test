@@ -221,7 +221,8 @@ testAdminConsoleHTTPS
 
 testServerStatus
 
-testAppDeployment
+#shoppingcart app already deployed in Admin Domain
+#testAppDeployment
 
 testDeployedAppHTTP
 

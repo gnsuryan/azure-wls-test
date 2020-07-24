@@ -383,26 +383,6 @@ function testDeployedAppHTTPS()
     endTest
 }
 
-function verifyManagedServerSystemService()
-{
-
-    startTest
-
-    systemctl | grep "$WLS_MANAGED_SERVER_SERVICE"
-
-    if [ $? == 1 ];
-    then
-        echo "FAILURE - Service $WLS_MANAGED_SERVER_SERVICE not found"
-        notifyFail
-    else
-        echo "SUCCESS - Service $WLS_MANAGED_SERVER_SERVICE found"
-        notifyPass
-    fi
-
-    endTest
-}
-
-
 #main
 
 get_param "$@"
@@ -426,7 +406,5 @@ testDeployedAppHTTPS
 #startAllServers
 
 #testManagedServerStatus "RUNNING"
-
-#verifyManagedServerSystemService
 
 printTestSummary

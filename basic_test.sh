@@ -14,7 +14,7 @@ function testHostInfo()
 
     if [ "$?" != "0" ];
     then
-       echo "FAILURE - VM: OS Version verification failed. "
+       echo "FAILURE - VM: OS Version verification failed. Expected $OS_VERSION"
        notifyFail
     else
        echo "SUCCESS - VM: OS version verified successfully"
@@ -206,10 +206,14 @@ function testUtilities()
 
     isUtilityInstalled "rng"
 
-    isUtilityInstalled "cifs-utils"
+    #isUtilityInstalled "cifs-utils"
 }
 
 #main
+
+get_param "$@"
+
+validate_input 
 
 testHostInfo
 

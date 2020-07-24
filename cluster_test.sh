@@ -65,7 +65,7 @@ function shutdownServer()
     -H Accept:application/json \
     -H Content-Type:application/json \
     -d "{}" \
-    -X POST ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes/${serverName}/shutdown)
+    -X POST ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes/${serverName}/forceShutdown)
 
     echo $output
 

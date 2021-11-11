@@ -1,7 +1,7 @@
 OS_VERSION="Oracle Linux Server 7.6"
 WLS_HOME=/u01/app/wls/install/oracle/middleware/oracle_home/wlserver
-JDK_PATH="/u01/app/jdk/jdk-11.0.7/"
-JDK_VERSION="build 11.0.7"
+JDK_PATH="/u01/app/jdk/jdk-11.0.11/"
+JDK_VERSION="build 11.0.11"
 WLS_VERSION=14.1.1.0.0
 WDT_HOME=/u01/domains/weblogic-deploy
 WLS_ADMIN_SERVICE="wls_admin.service"

@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function run_as_oracle_user()
-{
-    command="$1"
-    runuser -l oracle -c "$command"
-}
-
 function print_heading()
 {
   text="$1"
@@ -14,34 +8,11 @@ function print_heading()
 }
 
 
-print_heading "OS information"
-hostnamectl
-
-print_heading "JDK Details"
-run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && java -version && print_heading JAVA_HOME=\$JAVA_HOME"
-
-
-print_heading "WLS Details"
-run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && java weblogic.version && print_heading WL_HOME=\$WL_HOME"
-
 print_heading "OPatch version"
 run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && \$WL_HOME/../OPatch/opatch version"
 
 print_heading "OPatch details"
 run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && \$WL_HOME/../OPatch/opatch lsinventory"
-
-
-print_heading "JDBC Driver Details"
-run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && print_heading \$WEBLOGIC_CLASSPATH"
-
-print_heading "MSSQL Driver"
-run_as_oracle_user " [ -f /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/mssql-jdbc-7.4.1.jre8.jar ] && print_heading 'MSSQL Driver found'"
-
-print_heading "PostgreSQL Driver"
-run_as_oracle_user " [ -f /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/lib/postgresql-42.2.8.jar ] && print_heading 'PostgreSQL Driver found'"
-
-print_heading "rngd service"
-systemctl status rngd
 
 print_heading "create cluster domain and verify"
 

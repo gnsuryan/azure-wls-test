@@ -13,6 +13,13 @@ USAGE
 exit 1
 }
 
+function run_as_oracle_user()
+{
+    command="$1"
+    runuser -l oracle -c "$command"
+}
+
+
 get_param()
 {
     while [ "$1" ]
@@ -128,6 +135,8 @@ function testWDTInstallation()
 
     endTest    
 }
+
+source $CURR_DIR/test_config.properties
 
 export passcount=0
 export failcount=0

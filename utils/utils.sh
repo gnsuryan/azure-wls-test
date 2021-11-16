@@ -51,6 +51,11 @@ validate_input()
     source $INPUT_FILE
 }
 
+function countTotalTest()
+{
+   totalcount=$((totalcount+1))
+}
+
 function notifyPass()
 {
     passcount=$((passcount+1))
@@ -66,6 +71,7 @@ function printTestSummary()
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
     printf "\n     TEST EXECUTION SUMMARY"
     printf "\n     ++++++++++++++++++++++   \n"
+    printf "       TOTAL TESTS      :  ${totalcount} \n"
     printf "       NO OF TEST PASSED:  ${passcount} \n"
     printf "       NO OF TEST FAILED:  ${failcount} \n"
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
@@ -73,6 +79,7 @@ function printTestSummary()
 
 function startTest()
 {
+    countTotalTest
     TEST_INFO="${FUNCNAME[1]}"
     printf "\n\n"
     echo " -----------------------------------------------------------------------------------------"
@@ -138,5 +145,6 @@ function testWDTInstallation()
 
 source $CURR_DIR/test_config.properties
 
+export totalcount=0
 export passcount=0
 export failcount=0

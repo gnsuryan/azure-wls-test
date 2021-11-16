@@ -129,5 +129,7 @@ function testWDTInstallation()
     endTest    
 }
 
+source $CURR_DIR/test_config.properties
+
 export passcount=0
 export failcount=0

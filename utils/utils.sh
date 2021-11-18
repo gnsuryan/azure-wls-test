@@ -94,6 +94,13 @@ function endTest()
     printf "\n\n"
 }
 
+function print_heading()
+{
+  text="$1"
+  echo -e "\n################ $text #############\n"
+  echo -e "-----------------------------------------------------\n"
+}
+
 function isUtilityInstalled()
 {
     startTest

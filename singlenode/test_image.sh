@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
+source $CURR_DIR/../utils/utils.sh
 
 function setupDomain()
 {
@@ -71,8 +71,8 @@ function testServerRestart()
 {
     startTest
 
-    username=$(run_as_oracle_user "cat /u01/app/scripts/weblogic-cluster-domain-init/domain.properties | grep 'domain_username')
-    password=$(run_as_oracle_user "cat /u01/app/scripts/weblogic-cluster-domain-init/domain.properties | grep 'domain_password')
+    username=$(run_as_oracle_user "cat /u01/app/scripts/weblogic-cluster-domain-init/domain.properties | grep 'domain_username' | cut -d'=' -f 2")
+    password=$(run_as_oracle_user "cat /u01/app/scripts/weblogic-cluster-domain-init/domain.properties | grep 'domain_password' | cut -d'=' -f 2")
 
     print_heading "Testing Server Restart..."
     run_as_oracle_user ". /u01/app/wls/install/oracle/middleware/oracle_home/wlserver/server/bin/setWLSEnv.sh && cd /u01/app/scripts/weblogic-cluster-domain-init && java weblogic.WLST testServerRestart.py $username $password t3://$HOSTNAME:7001"
@@ -89,8 +89,6 @@ function testServerRestart()
     endTest
 }
 
-
-source $CURR_DIR/../utils/utils.h
 
 setupDomain
 

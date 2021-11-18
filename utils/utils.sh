@@ -92,6 +92,8 @@ function endTest()
     echo " TEST EXECUTION  END :   >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
     echo " -----------------------------------------------------------------------------------------"
     printf "\n\n"
+
+    printTestSummary
 }
 
 function print_heading()

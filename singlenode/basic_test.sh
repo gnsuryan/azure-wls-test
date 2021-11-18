@@ -134,6 +134,10 @@ function testJDBCDrivers()
         notifyFail
     fi
 
+    endTest
+
+    startTest
+
     if [[ -f "${WLS_HOME}/server/lib/${MSSQL_JAR}" ]];
     then
         echo "SUCCESS: ${MSSQL_JAR} file is found in Weblogic Server lib directory as expected"
@@ -142,6 +146,10 @@ function testJDBCDrivers()
         echo "FAILURE: ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
         notifyFail
     fi
+
+    endTest
+
+    startTest
   
     cd ${WLS_HOME}/server/bin
 
@@ -230,5 +238,3 @@ testJDBCDrivers
 testRNGDService
 
 testUtilities
-
-printTestSummary

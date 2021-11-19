@@ -1,6 +1,10 @@
 #!/bin/bash
 
-CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export UTILS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+echo "UTILS_DIR: ${UTILS_DIR}"
+
+export BASE_DIR="$(readlink -f $UTILS_DIR/..)"
+echo "BASE_DIR: ${BASE_DIR}"
 
 usage()
 {
@@ -51,11 +55,6 @@ validate_input()
     source $INPUT_FILE
 }
 
-function countTotalTest()
-{
-   totalcount=$((totalcount+1))
-}
-
 function notifyPass()
 {
     passcount=$((passcount+1))
@@ -71,7 +70,6 @@ function printTestSummary()
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
     printf "\n     TEST EXECUTION SUMMARY"
     printf "\n     ++++++++++++++++++++++   \n"
-    printf "       TOTAL TESTS      :  ${totalcount} \n"
     printf "       NO OF TEST PASSED:  ${passcount} \n"
     printf "       NO OF TEST FAILED:  ${failcount} \n"
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
@@ -79,7 +77,6 @@ function printTestSummary()
 
 function startTest()
 {
-    countTotalTest
     TEST_INFO="${FUNCNAME[1]}"
     printf "\n\n"
     echo " -----------------------------------------------------------------------------------------"
@@ -152,8 +149,7 @@ function testWDTInstallation()
     endTest    
 }
 
-source $CURR_DIR/test_config.properties
+source ${UTILS_DIR}/test_config.properties
 
-export totalcount=0
 export passcount=0
 export failcount=0

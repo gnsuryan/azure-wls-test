@@ -1,8 +1,9 @@
 #!/bin/bash
 
-CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CLUSTER_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-source $CURR_DIR/../utils/utils.sh
+source ${CLUSTER_DIR}/../utils/utils.sh
+source ${CLUSTER_DIR}/../utils/test_config.properties
 
 function isServerRunning()
 {
@@ -262,8 +263,6 @@ function testManagedServerStatus()
 function testAppDeployment()
 {
     startTest
-
-    echo "DEPLOY_APP_PATH: $DEPLOY_APP_PATH"
 
     retcode=$(curl -v -s \
             --user ${WLS_USERNAME}:${WLS_PASSWORD} \

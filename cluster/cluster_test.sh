@@ -262,6 +262,11 @@ function testManagedServerStatus()
 
 function testAppDeployment()
 {
+
+    mkdir -p /tmp/deploy
+    cp ${SHOPPING_CART_APP_PATH} /tmp/deploy/
+    chown -R oracle:oracle /tmp/deploy
+
     startTest
 
     retcode=$(curl -v -s \
@@ -271,15 +276,15 @@ function testAppDeployment()
             -H Content-Type:application/json \
             -d "{
                 name: '${SHOPPING_CART_APP_NAME}',
-                deploymentPath: '${SHOPPING_CART_APP_PATH}',
-                targets: [ '${CLUSTER_NAME}' ]
+                deploymentPath: '/tmp/deploy/${SHOPPING_DEPLOY_APP}',
+                targets:    [ '${CLUSTER_NAME}' ]
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
     echo "$retcode"
 
     deploymentStatus="$(echo $retcode | jq -r '.messages[]|.severity')"
-    
+
     if [ "${deploymentStatus}" != "SUCCESS" ];
     then
         echo "Error!! App Deployment Failed. Deployment Status: ${deploymentStatus}"
@@ -288,6 +293,7 @@ function testAppDeployment()
         echo "SUCCESS: App Deployed Successfully. Deployment Status: ${deploymentStatus}"
         notifyPass
     fi
+    rm -rf /tmp/deploy
 
     echo "Wait for 15 seconds for the deployed Apps to become available..."
     sleep 15s

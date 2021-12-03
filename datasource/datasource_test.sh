@@ -9,14 +9,6 @@ function verifyJDBCDataSource()
 {
     echo "verifying JDBC Datasource..."
 
-    RESULT=$(curl -v -s \
-    --user weblogic:Weblogic5678 \
-    -H X-Requested-By:MyClient \
-    -H Accept:application/json \
-    -H Content-Type:application/json \
-    -X GET http://adminVM:7001/management/tenant-monitoring/datasources)
-
-
     output=$(curl -s -v \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \

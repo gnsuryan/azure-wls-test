@@ -67,6 +67,14 @@ function notifyFail()
 
 function printTestSummary()
 {
+    exitOnFailure="$1"
+
+    if [ -z "$exitOnFailure" ];
+    then
+       exitOnFailure="true"
+    fi
+
+  
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
     printf "\n     TEST EXECUTION SUMMARY"
     printf "\n     ++++++++++++++++++++++   \n"
@@ -74,9 +82,12 @@ function printTestSummary()
     printf "       NO OF TEST FAILED:  ${failcount} \n"
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
 
-    if [ $failcount -gt 0 ];
+    if [ "$exitOnFailure" == "true" ];
     then
-      exit 1
+      if [ $failcount -gt 0 ];
+      then
+        exit 1
+      fi
     fi
 }
 
@@ -95,7 +106,7 @@ function endTest()
     echo " -----------------------------------------------------------------------------------------"
     printf "\n\n"
 
-    printTestSummary
+    printTestSummary "false"
 }
 
 function print_heading()

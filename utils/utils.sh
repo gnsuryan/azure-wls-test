@@ -73,6 +73,11 @@ function printTestSummary()
     printf "       NO OF TEST PASSED:  ${passcount} \n"
     printf "       NO OF TEST FAILED:  ${failcount} \n"
     printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
+
+    if [ $failcount -gt 0 ];
+    then
+      exit 1
+    fi
 }
 
 function startTest()

@@ -238,3 +238,5 @@ testJDBCDrivers
 testRNGDService
 
 testUtilities
+
+printTestSummary

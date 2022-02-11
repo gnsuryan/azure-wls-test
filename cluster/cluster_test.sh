@@ -196,6 +196,11 @@ function getClusterName()
     for i in "${!managedServerArray[@]}"; 
     do
         serverName="${managedServerArray[$i]}"
+
+        if [[ $serverName == *"Storage"* ]];
+        then
+          continue
+        fi
         
         output=$(curl -s -v \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \
@@ -325,6 +330,11 @@ function testDeployedAppHTTP()
     for i in "${!managedServerArray[@]}"; 
     do
         serverName="${managedServerArray[$i]}"
+
+        if [[ $serverName == *"Storage"* ]];
+        then
+          continue
+        fi
         
         output=$(curl -s -v \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \

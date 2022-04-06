@@ -4,7 +4,6 @@ export UTILS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pw
 echo "UTILS_DIR: ${UTILS_DIR}"
 
 export BASE_DIR="$(readlink -f $UTILS_DIR/..)"
-echo "BASE_DIR: ${BASE_DIR}"
 
 usage()
 {
@@ -21,6 +20,15 @@ function run_as_oracle_user()
 {
     command="$1"
     runuser -l oracle -c "$command"
+}
+
+function print()
+{
+  if [ "$DEBUG" == "true" ];
+  then
+   message="$1"
+   echo -e "$1"
+  fi
 }
 
 
@@ -50,7 +58,7 @@ validate_input()
         echo "Provided input file ${INPUT_FILE} not found"
         exit 1
     fi
-   
+
     echo "Using input file $INPUT_FILE"
     source $INPUT_FILE
 }
@@ -74,13 +82,10 @@ function printTestSummary()
        exitOnFailure="true"
     fi
 
-  
-    printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
     printf "\n     TEST EXECUTION SUMMARY"
     printf "\n     ++++++++++++++++++++++   \n"
     printf "       NO OF TEST PASSED:  ${passcount} \n"
     printf "       NO OF TEST FAILED:  ${failcount} \n"
-    printf "\n++++++++++++++++++++++++++++++++++++++++++\n"
 
     if [ "$exitOnFailure" == "true" ];
     then
@@ -94,35 +99,53 @@ function printTestSummary()
 function startTest()
 {
     TEST_INFO="${FUNCNAME[1]}"
-    printf "\n\n"
-    echo " -----------------------------------------------------------------------------------------"
-    echo " TEST EXECUTION START:  >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
+    print "\n\n"
+    print " -----------------------------------------------------------------------------------------"
+    print " TEST EXECUTION START:  >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
 }
 
 function endTest()
 {
     TEST_INFO="${FUNCNAME[1]}"
-    echo " TEST EXECUTION  END :   >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
-    echo " -----------------------------------------------------------------------------------------"
-    printf "\n\n"
+    print " TEST EXECUTION  END :   >>>>>>     ${TEST_INFO}      <<<<<<<<<<<<<<<<<<<"
+    print " -----------------------------------------------------------------------------------------"
+    print "\n\n"
 
-    printTestSummary "false"
+    printDebugLog
+
+    #printTestSummary "false" "$TEST_INFO"
+}
+
+function printDebugLog()
+{
+    if [ "$DEBUG" == "true" ];
+    then
+      if [ -f /tmp/debug.log ];
+      then
+       cat /tmp/debug.log
+       sleep 1s
+       rm -f /tmp/debug.log
+      fi
+    else
+       rm -f /tmp/debug.log
+    fi
+
 }
 
 function print_heading()
 {
   text="$1"
-  echo -e "\n################ $text #############\n"
-  echo -e "-----------------------------------------------------\n"
+  print "\n################ $text #############\n"
+  print "-----------------------------------------------------\n"
 }
 
 function isUtilityInstalled()
 {
     startTest
 
-    utilityName="$1"    
-    
-    yum list installed | grep "$utilityName"
+    utilityName="$1"
+
+    yum list installed | grep "$utilityName" > /tmp/debug.log 2>&1
 
     if [ "$?" != "0" ];
     then
@@ -131,6 +154,13 @@ function isUtilityInstalled()
     else
        echo "SUCCESS - Utility $utilityName found."
        notifyPass
+    fi
+
+    if [ "$DEBUG" == "true" ];
+    then
+      cat /tmp/debug.log
+    else
+       rm -f /tmp/debug.log
     fi
 
     endTest
@@ -142,30 +172,31 @@ function testWDTInstallation()
 
     if [ ! -d "$WDT_HOME" ];
     then
-        echo "FAILURE: Weblogic Deploy Tool not found"
+        print "FAILURE - Weblogic Deploy Tool not found"
         notifyFail
         endTest
         return
     else
-        echo "SUCCESS: Weblogic Deploy Tool found"
+        print "SUCCESS - Weblogic Deploy Tool found"
         notifyPass
-        
+
         $WDT_HOME/bin/createDomain.sh
 
         if [ "$?" != "0" ];
         then
-            echo "FAILURE: Failed to verify Deploy Tool"
+            print "FAILURE - Failed to verify Deploy Tool"
             notifyFail
         else
-            echo "SUCCESS: Deploy tool verified successfully"
+            print "SUCCESS - Deploy tool verified successfully"
             notifyPass
         fi
     fi
 
-    endTest    
+    endTest
 }
 
 source ${UTILS_DIR}/test_config.properties
 
 export passcount=0
 export failcount=0
+

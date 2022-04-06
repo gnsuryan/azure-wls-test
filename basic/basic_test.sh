@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" > /tmp/debug.log 2>&1 && pwd )"
 
 source $CURR_DIR/../utils/utils.sh
 
@@ -8,9 +8,7 @@ function testHostInfo()
 {
     startTest
 
-    hostnamectl
-
-    hostnamectl | grep "$OS_VERSION"
+    hostnamectl | grep "$OS_VERSION" > /tmp/debug.log 2>&1
 
     if [ "$?" != "0" ];
     then
@@ -28,13 +26,13 @@ function testWLSInstallPath()
 {
     startTest
 
-    echo "WLS_HOME: ${WLS_HOME}"
+    print "WLS_HOME: ${WLS_HOME}"
 
     if [ ! -d "${WLS_HOME}" ]; then
-      echo "Weblogic Server not installed as per the expected directory structure: ${WLS_HOME} "
+      echo "FAILURE - Weblogic Server not installed as per the expected directory structure: ${WLS_HOME} "
       notifyFail
     else
-      echo "Weblogic Server install path verified successfully"
+      echo  "SUCCESS - Weblogic Server install path verified successfully"
       notifyPass
     fi
 
@@ -49,22 +47,22 @@ function testWLSVersion()
       echo "Weblogic Server not installed as per the expected directory structure"
       notifyFail
     else
-        
+
         cd ${WLS_HOME}/server/bin
 
-        . ./setWLSEnv.sh
+        . ./setWLSEnv.sh > /tmp/debug.log 2>&1
 
         OUTPUT="$(java weblogic.version)"
-        echo "${OUTPUT}"
+        #print "${OUTPUT}"
 
-        echo "${OUTPUT}"|grep ${WLS_VERSION}
+        echo  "${OUTPUT}"|grep ${WLS_VERSION} > /tmp/debug.log 2>&1
 
         if [ "$?" != "0" ];
         then
            echo "FAILURE - Weblogic Server Version could not be verified "
            notifyFail
         else
-           echo "SUCCESS - Weblogic Server Version verified successfully"
+           echo  "SUCCESS - Weblogic Server Version verified successfully"
            notifyPass
         fi
     fi
@@ -79,15 +77,15 @@ function testJavaInstallPath()
 
     cd ${WLS_HOME}/server/bin
 
-    . ./setWLSEnv.sh
+    . ./setWLSEnv.sh > /tmp/debug.log 2>&1
 
     if [ ! -d "${JAVA_HOME}" ]; then
-      echo "JAVA/JDK is not installed as per the expected directory structure: ${WLS_HOME} "
+      echo "FAILURE - JAVA/JDK is not installed as per the expected directory structure: ${WLS_HOME} "
       notifyFail
     else
-      echo "JAVA/JDK installation path verified successfully"
+      echo "SUCCESS - JAVA/JDK installation path verified successfully"
       notifyPass
-    fi     
+    fi
 
     endTest
 }
@@ -98,17 +96,15 @@ function testJavaVersion()
 
     cd ${WLS_HOME}/server/bin
 
-    . ./setWLSEnv.sh
+    . ./setWLSEnv.sh > /tmp/debug.log 2>&1
 
     java -version 2> /tmp/java_version.txt
 
-    cat /tmp/java_version.txt 
-    
-    cat /tmp/java_version.txt |grep "${JDK_VERSION}"
-    
+    cat /tmp/java_version.txt |grep "${JDK_VERSION}" > /tmp/debug.log 2>&1
+
     if [ "$?" != "0" ];
     then
-       echo "FAILURE - Java Version could not be verified "
+       echo  "FAILURE - Java Version could not be verified "
        notifyFail
     else
        echo "SUCCESS - Java Server Version verified successfully"
@@ -127,10 +123,10 @@ function testJDBCDrivers()
 
     if [[ -f "${WLS_HOME}/server/lib/${POSTGRESQL_JAR}" ]];
     then
-        echo "SUCCESS: ${POSTGRESQL_JAR} file is found in Weblogic Server lib directory as expected"
+        echo "SUCCESS - ${POSTGRESQL_JAR} file is found in Weblogic Server lib directory as expected"
         notifyPass
     else
-        echo "FAILURE: ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Server lib directory as expected"
         notifyFail
     fi
 
@@ -140,42 +136,42 @@ function testJDBCDrivers()
 
     if [[ -f "${WLS_HOME}/server/lib/${MSSQL_JAR}" ]];
     then
-        echo "SUCCESS: ${MSSQL_JAR} file is found in Weblogic Server lib directory as expected"
+        echo "SUCCESS - ${MSSQL_JAR} file is found in Weblogic Server lib directory as expected"
         notifyPass
     else
-        echo "FAILURE: ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
+        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Server lib directory as expected"
         notifyFail
     fi
 
     endTest
 
     startTest
-  
+
     cd ${WLS_HOME}/server/bin
 
-    . ./setWLSEnv.sh >/dev/null
-  
-    echo ${WEBLOGIC_CLASSPATH} | grep "${POSTGRESQL_JAR}"
+    . ./setWLSEnv.sh > /tmp/debug.log 2>&1
+
+    echo ${WEBLOGIC_CLASSPATH} | grep "${POSTGRESQL_JAR}" > /tmp/debug.log 2>&1
 
     if [ $? == 1 ];
     then
-        echo "FAILURE: ${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE - ${POSTGRESQL_JAR} file is not found in Weblogic Classpath as expected"
         notifyFail
     else
-        echo "SUCCESS: ${POSTGRESQL_JAR} file found in Weblogic Classpath as expected"
+        echo "SUCCESS - ${POSTGRESQL_JAR} file found in Weblogic Classpath as expected"
         notifyPass
     fi
 
-    echo "==========================================================================="
+    print "==========================================================================="
 
-    echo ${WEBLOGIC_CLASSPATH} | grep "${MSSQL_JAR}"
+    echo ${WEBLOGIC_CLASSPATH} | grep "${MSSQL_JAR}" > /tmp/debug.log 2>&1
 
     if [ $? == 1 ];
     then
-        echo "FAILURE: ${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
+        echo "FAILURE - ${MSSQL_JAR} file is not found in Weblogic Classpath as expected"
         notifyFail
     else
-        echo "SUCCESS: ${MSSQL_JAR} file found in Weblogic Classpath as expected"
+        echo "SUCCESS - ${MSSQL_JAR} file found in Weblogic Classpath as expected"
         notifyPass
     fi
 
@@ -187,16 +183,16 @@ function testRNGDService()
 
     startTest
 
-    systemctl status rngd | grep "active (running)"
+    systemctl status rngd | grep "active (running)" > /tmp/debug.log 2>&1
 
     if [ "$?" != "0" ];
     then
-        echo "FAILURE: rngd service not active"
+        echo "FAILURE - rngd service not active"
         notifyFail
         endTest
         return
     else
-        echo "SUCCESS: rngd service is active"
+        echo "SUCCESS - rngd service is active"
         notifyPass
     fi
 
@@ -221,7 +217,7 @@ function testUtilities()
 
 get_param "$@"
 
-validate_input 
+validate_input
 
 testHostInfo
 

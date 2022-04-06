@@ -9,21 +9,21 @@ function isServerRunning()
     serverName="$1"
     serverStatus="$2"
 
-    echo "serverName: $serverName"
-    echo "serverStatus: $serverStatus"
+    print "serverName: $serverName"
+    print "serverStatus: $serverStatus"
 
     if [ -z "$serverStatus" ];
     then
-        echo "FAILURE: Invalid Server Status for Server $serverName"
+        echo "FAILURE - Invalid Server Status for Server $serverName"
         notifyFail
     fi
 
     if [ "$serverStatus" != "RUNNING" ];
     then
-        echo "FAILURE: Server $serverName not running as expected."
+        echo "FAILURE - Server $serverName not running as expected."
         notifyFail
     else
-        echo "SUCCESS: Server $serverName running as expected."
+        echo "SUCCESS - Server $serverName running as expected."
         notifyPass
     fi
 }
@@ -32,13 +32,13 @@ function testWLSDomainPath()
 {
     startTest
 
-    echo "DOMAIN_DIR: ${ADMIN_DOMAIN_DIR}"
+    print "DOMAIN_DIR: ${ADMIN_DOMAIN_DIR}"
 
     if [ ! -d "${ADMIN_DOMAIN_DIR}" ]; then
-      echo "Weblogic Server Domain directory not setup as per the expected directory structure: ${ADMIN_DOMAIN_DIR} "
+      echo "FAILURE - Weblogic Server Domain directory not setup as per the expected directory structure: ${ADMIN_DOMAIN_DIR} "
       notifyFail
     else
-      echo "Weblogic Server Domain path verified successfully"
+      echo "SUCCESS - Weblogic Server Domain path verified successfully"
       notifyPass
     fi
 
@@ -54,10 +54,10 @@ function testAdminConsoleHTTP()
 
     if [ "${retcode}" != "200" ];
     then
-        echo "FAILURE: Admin Console is not accessible. Curl returned code ${retcode}"
+        echo "FAILURE - Admin Console is not accessible. Curl returned code ${retcode}"
         notifyFail
     else
-        echo "SUCCESS: Admin Console is accessible. Curl returned code ${retcode}"
+        echo "SUCCESS - Admin Console is accessible. Curl returned code ${retcode}"
         notifyPass
     fi
 
@@ -72,10 +72,10 @@ function testAdminConsoleHTTPS()
 
     if [ "${retcode}" != "200" ];
     then
-        echo "Error!! Admin Console is not accessible. Curl returned code ${retcode}"
+        echo "FAILURE - Admin Console is not accessible. Curl returned code ${retcode}"
         notifyFail
     else
-        echo "SUCCESS: Admin Console is accessible. Curl returned code ${retcode}"
+        echo "SUCCESS - Admin Console is accessible. Curl returned code ${retcode}"
         notifyPass
     fi
 
@@ -86,19 +86,17 @@ function testServerStatus()
 {
     startTest
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name,state)
 
-    echo $output
-
     adminServerStatus=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name | test($ADMIN_NAME;"i")) | .state ')
-    echo "Admin Server Status: $adminServerStatus"
+    print "Admin Server Status: $adminServerStatus"
 
     isServerRunning "AdminServer" "$adminServerStatus"
-
+    sleep 1s
     endTest
 }
 
@@ -114,8 +112,8 @@ function testAppDeployment()
 
     adminServerName=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name | test($ADMIN_NAME;"i")) | .name ')
 
-    echo "Deploying to: $adminServerName"
-    echo "DEPLOY_APP_PATH: $DEPLOY_APP_PATH"
+    print "Deploying to: $adminServerName"
+    print "DEPLOY_APP_PATH: $DEPLOY_APP_PATH"
 
     retcode=$(curl -v -s \
             --user ${WLS_USERNAME}:${WLS_PASSWORD} \
@@ -129,22 +127,22 @@ function testAppDeployment()
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
-    echo "$retcode"
+    print "$retcode"
 
     deploymentStatus="$(echo $retcode | jq -r '.messages[]|.severity')"
-    
+
     if [ "${deploymentStatus}" != "SUCCESS" ];
     then
-        echo "Error!! App Deployment Failed. Deployment Status: ${deploymentStatus}"
+        echo "FAILURE - App Deployment Failed. Deployment Status: ${deploymentStatus}"
         notifyFail
     else
-        echo "SUCCESS: App Deployed Successfully. Deployment Status: ${deploymentStatus}"
+        echo "SUCCESS - App Deployed Successfully. Deployment Status: ${deploymentStatus}"
         notifyPass
     fi
 
     endTest
 
-    echo "Wait for 30 seconds for the deployed Apps to become available..."
+    print "Wait for 30 seconds for the deployed Apps to become available..."
     sleep 30s
 
 }
@@ -158,10 +156,10 @@ function testDeployedAppHTTP()
 
     if [ "${retcode}" != "200" ];
     then
-        echo "FAILURE: Deployed App is not accessible. Curl returned code ${retcode}"
+        echo "FAILURE - Deployed App is not accessible. Curl returned code ${retcode}"
         notifyFail
     else
-        echo "SUCCESS: Deployed App is accessible. Curl returned code ${retcode}"
+        echo "SUCCESS - Deployed App is accessible. Curl returned code ${retcode}"
         notifyPass
     fi
 
@@ -177,10 +175,10 @@ function testDeployedAppHTTPS()
 
     if [ "${retcode}" != "200" ];
     then
-        echo "FAILURE: Deployed App is not accessible. Curl returned code ${retcode}"
+        echo "FAILURE - Deployed App is not accessible. Curl returned code ${retcode}"
         notifyFail
     else
-        echo "SUCCESS: Deployed App is accessible. Curl returned code ${retcode}"
+        echo "SUCCESS - Deployed App is accessible. Curl returned code ${retcode}"
         notifyPass
     fi
 
@@ -192,7 +190,7 @@ function verifyAdminSystemService()
 
     startTest
 
-    systemctl | grep "$WLS_ADMIN_SERVICE"
+    systemctl | grep "$WLS_ADMIN_SERVICE" > /tmp/debug.log 2>&1
 
     if [ $? == 1 ];
     then
@@ -231,3 +229,4 @@ testDeployedAppHTTPS
 verifyAdminSystemService
 
 printTestSummary
+

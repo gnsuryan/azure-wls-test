@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export UTILS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo "UTILS_DIR: ${UTILS_DIR}"
+#echo "UTILS_DIR: ${UTILS_DIR}"
 
 export BASE_DIR="$(readlink -f $UTILS_DIR/..)"
 

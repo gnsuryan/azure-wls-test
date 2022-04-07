@@ -10,21 +10,21 @@ function isServerRunning()
     serverName="$1"
     serverStatus="$2"
 
-    echo "serverName: $serverName"
-    echo "serverStatus: $serverStatus"
+    print "serverName: $serverName"
+    print "serverStatus: $serverStatus"
 
     if [ -z "$serverStatus" ];
     then
-        echo "FAILURE: Invalid Server Status for Server $serverName"
+        echo "FAILURE - Invalid Server Status for Server $serverName"
         notifyFail
     fi
 
     if [ "$serverStatus" != "RUNNING" ];
     then
-        echo "FAILURE: Server $serverName not running as expected."
+        echo "FAILURE - Server $serverName not running as expected."
         notifyFail
     else
-        echo "SUCCESS: Server $serverName running as expected."
+        echo "SUCCESS - Server $serverName running as expected."
         notifyPass
     fi
 }
@@ -34,21 +34,21 @@ function isServerShutdown()
     serverName="$1"
     serverStatus="$2"
 
-    echo "serverName: $serverName"
-    echo "serverStatus: $serverStatus"
+    print "serverName: $serverName"
+    print "serverStatus: $serverStatus"
 
     if [ -z "$serverStatus" ];
     then
-        echo "FAILURE: Invalid Server Status for Server $serverName"
+        echo "FAILURE - Invalid Server Status for Server $serverName"
         notifyFail
     fi
 
     if [ "$serverStatus" != "SHUTDOWN" ];
     then
-        echo "FAILURE: Server $serverName not shutdown as expected."
+        echo "FAILURE - Server $serverName not shutdown as expected."
         notifyFail
     else
-        echo "SUCCESS: Server $serverName shutdown as expected."
+        echo "SUCCESS - Server $serverName shutdown as expected."
         notifyPass
     fi
 }
@@ -58,9 +58,9 @@ function shutdownServer()
 {
     serverName="$1"
 
-    echo "Shutting down Server : $serverName"
+    print "Shutting down Server : $serverName"
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -68,16 +68,16 @@ function shutdownServer()
     -d "{}" \
     -X POST ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes/${serverName}/forceShutdown)
 
-    echo $output
+    print $output
 
     shutdownStatus="$(echo $output | jq -r '.progress')"
 
     if [ "$shutdownStatus" != "success" ];
     then
-        echo "FAILURE: Server $serverName not shutdown as expected."
+        echo "FAILURE - Server $serverName not shutdown as expected."
         notifyFail
     else
-        echo "SUCCESS: Server $serverName shutdown as expected."
+        echo "SUCCESS - Server $serverName shutdown as expected."
         notifyPass
     fi
 }
@@ -86,9 +86,9 @@ function startServer()
 {
     serverName="$1"
 
-    echo "Start Server : $serverName"
+    print "Start Server : $serverName"
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -96,28 +96,28 @@ function startServer()
     -d "{}" \
     -X POST ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes/${serverName}/start)
 
-    echo $output
+    print $output
 
     serverStartStatus="$(echo $output | jq -r '.progress')"
 
     if [ "$serverStartStatus" != "success" ];
     then
-        echo "FAILURE: Server $serverName not started as expected."
+        echo "FAILURE - Server $serverName not started as expected."
         notifyFail
     else
-        echo "SUCCESS: Server $serverName started as expected."
+        echo "SUCCESS - Server $serverName started as expected."
         notifyPass
     fi
 
-    echo "Shut down Server : $serverName Successful"
+    print "start Server : $serverName Successful"
 }
 
 function shutdownAllServers()
 {
 
-    echo "ShutdownAllServers...."
+    print "ShutdownAllServers...."
     
-     output=$(curl -s -v \
+     output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -146,9 +146,9 @@ function shutdownAllServers()
 function startAllServers()
 {
 
-    echo "StartAllServers...."
+    print "StartAllServers...."
     
-     output=$(curl -s -v \
+     output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -177,13 +177,13 @@ function getClusterName()
 
     startTest
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name)
 
-    echo $output
+    print $output
 
     managedServers="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .name')"
     managedServers="$(echo $managedServers| tr '\n' ' ')"
@@ -202,7 +202,7 @@ function getClusterName()
           continue
         fi
         
-        output=$(curl -s -v \
+        output=$(curl -s \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \
         -H X-Requested-By:MyClient \
         -H Accept:application/json \
@@ -211,7 +211,7 @@ function getClusterName()
 
         CLUSTER_NAME="$(echo $output | jq -r '.cluster[1]')"
 
-        echo "ClusterName: $CLUSTER_NAME"
+        print "ClusterName: $CLUSTER_NAME"
 
         break
 
@@ -227,13 +227,13 @@ function testManagedServerStatus()
 
     startTest
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name,state)
 
-    echo $output
+    print $output
 
     managedServer="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .name')"
     managedServerStatus="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .state')"
@@ -249,11 +249,10 @@ function testManagedServerStatus()
     do
         serverName="${managedServerArray[$i]}"
         serverStatus="${managedServerStatusArray[$i]}"
-        
-        
+      
         if [ "$expectedStatus" == "RUNNING" ];
         then
-          isServerRunning "$serverName" "$serverStatus"
+              isServerRunning "$serverName" "$serverStatus"
         else
           if [ "$expectedStatus" == "SHUTDOWN" ];
           then
@@ -274,7 +273,7 @@ function testAppDeployment()
 
     startTest
 
-    retcode=$(curl -v -s \
+    retcode=$(curl -s \
             --user ${WLS_USERNAME}:${WLS_PASSWORD} \
             -H X-Requested-By:MyClient \
             -H Accept:application/json \
@@ -286,21 +285,21 @@ function testAppDeployment()
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
-    echo "$retcode"
+    print "$retcode"
 
     deploymentStatus="$(echo $retcode | jq -r '.messages[]|.severity')"
 
     if [ "${deploymentStatus}" != "SUCCESS" ];
     then
-        echo "Error!! App Deployment Failed. Deployment Status: ${deploymentStatus}"
+        echo "FAILURE - App Deployment Failed. Deployment Status: ${deploymentStatus}"
         notifyFail
     else
-        echo "SUCCESS: App Deployed Successfully. Deployment Status: ${deploymentStatus}"
+        echo "SUCCESS - App Deployed Successfully. Deployment Status: ${deploymentStatus}"
         notifyPass
     fi
     rm -rf /tmp/deploy
 
-    echo "Wait for 15 seconds for the deployed Apps to become available..."
+    print "Wait for 15 seconds for the deployed Apps to become available..."
     sleep 15s
 
     endTest
@@ -311,13 +310,13 @@ function testDeployedAppHTTP()
 {
     startTest
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
     -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/domainRuntime/serverLifeCycleRuntimes?links=none&fields=name)
 
-    echo $output
+    print $output
 
     managedServers="$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name| test($ADMIN_NAME;"i") | not ) | .name')"
     managedServers="$(echo $managedServers| tr '\n' ' ')"
@@ -336,7 +335,7 @@ function testDeployedAppHTTP()
           continue
         fi
         
-        output=$(curl -s -v \
+        output=$(curl -s \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \
         -H X-Requested-By:MyClient \
         -H Accept:application/json \
@@ -346,29 +345,29 @@ function testDeployedAppHTTP()
         serverListenPort="$(echo $output | jq -r '.listenPort')"
         serverListenAddress="$(echo $output | jq -r '.listenAddress')"
 
-        echo $output
+        print $output
 
-        echo "\n\n\********************************************\n\n"
+        print "\n\n\********************************************\n\n"
 
-        echo "ServerListenAddress: $serverListenAddress"
-        echo "ServerListenPort: $serverListenPort"
+        print "ServerListenAddress: $serverListenAddress"
+        print "ServerListenPort: $serverListenPort"
 
         HTTP_SHOPPING_CART_APP_URL="http://${serverListenAddress}:$serverListenPort/shoppingcart"
 
-        echo "checking Shopping Cart URL: $HTTP_SHOPPING_CART_APP_URL"
+        print "checking Shopping Cart URL: $HTTP_SHOPPING_CART_APP_URL"
 
-        retcode=$(curl -L -s -v -o /dev/null -w "%{http_code}" ${HTTP_SHOPPING_CART_APP_URL} )
+        retcode=$(curl -L -s -o /dev/null -w "%{http_code}" ${HTTP_SHOPPING_CART_APP_URL} )
 
         if [ "${retcode}" != "200" ];
         then
-            echo "FAILURE: Deployed App is not accessible. Curl returned code ${retcode}"
+            echo "FAILURE - Deployed App is not accessible on ${serverName}. Curl returned code ${retcode}"
             notifyFail
         else
-            echo "SUCCESS: Deployed App is accessible. Curl returned code ${retcode}"
+            echo "SUCCESS - Deployed App is accessible on ${serverName}. Curl returned code ${retcode}"
             notifyPass
         fi
 
-        echo -e "\n\n********************************************\n\n\n"
+        print -e "\n\n********************************************\n\n\n"
         sleep 2s
 
     done
@@ -393,9 +392,13 @@ testDeployedAppHTTP
 
 shutdownAllServers
 
+sleep 30s
+
 testManagedServerStatus "SHUTDOWN"
 
 startAllServers
+
+sleep 30s
 
 testManagedServerStatus "RUNNING"
 

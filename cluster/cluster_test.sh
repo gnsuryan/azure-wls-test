@@ -400,7 +400,7 @@ getClusterName
 testAppDeployment
 
 testDeployedAppHTTP
-okok 
+
 shutdownAllServers
 
 sleep 30s

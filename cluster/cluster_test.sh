@@ -116,7 +116,7 @@ function shutdownAllServers()
 {
 
     print "ShutdownAllServers...."
-    
+
      output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
@@ -133,9 +133,9 @@ function shutdownAllServers()
     IFS=' '
     read -a managedServerArray <<< "$managedServers"
 
-    for i in "${!managedServerArray[@]}"; 
+    for i in "${!managedServerArray[@]}";
     do
-        serverName="${managedServerArray[$i]}"        
+        serverName="${managedServerArray[$i]}"
         shutdownServer $serverName
         sleep 5s
     done
@@ -147,7 +147,7 @@ function startAllServers()
 {
 
     print "StartAllServers...."
-    
+
      output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
@@ -164,7 +164,7 @@ function startAllServers()
     IFS=' '
     read -a managedServerArray <<< "$managedServers"
 
-    for i in "${!managedServerArray[@]}"; 
+    for i in "${!managedServerArray[@]}";
     do
         serverName="${managedServerArray[$i]}"
         startServer $serverName
@@ -193,7 +193,7 @@ function getClusterName()
     IFS=' '
     read -a managedServerArray <<< "$managedServers"
 
-    for i in "${!managedServerArray[@]}"; 
+    for i in "${!managedServerArray[@]}";
     do
         serverName="${managedServerArray[$i]}"
 
@@ -201,7 +201,7 @@ function getClusterName()
         then
           continue
         fi
-        
+
         output=$(curl -s \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \
         -H X-Requested-By:MyClient \
@@ -245,11 +245,11 @@ function testManagedServerStatus()
     read -a managedServerArray <<< "$managedServer"
     read -a managedServerStatusArray <<< "$managedServerStatus"
 
-    for i in "${!managedServerArray[@]}"; 
+    for i in "${!managedServerArray[@]}";
     do
         serverName="${managedServerArray[$i]}"
         serverStatus="${managedServerStatusArray[$i]}"
-      
+
         if [ "$expectedStatus" == "RUNNING" ];
         then
               isServerRunning "$serverName" "$serverStatus"
@@ -326,7 +326,7 @@ function testDeployedAppHTTP()
     IFS=' '
     read -a managedServerArray <<< "$managedServers"
 
-    for i in "${!managedServerArray[@]}"; 
+    for i in "${!managedServerArray[@]}";
     do
         serverName="${managedServerArray[$i]}"
 
@@ -334,7 +334,7 @@ function testDeployedAppHTTP()
         then
           continue
         fi
-        
+
         output=$(curl -s \
         --user ${WLS_USERNAME}:${WLS_PASSWORD} \
         -H X-Requested-By:MyClient \
@@ -342,13 +342,24 @@ function testDeployedAppHTTP()
         -H Content-Type:application/json \
         -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/serverConfig/servers/${serverName})
 
-        serverListenPort="$(echo $output | jq -r '.listenPort')"
-        serverListenAddress="$(echo $output | jq -r '.listenAddress')"
+        print "$output"
 
-        print $output
+        serverListenPort="$(echo $output | jq -r '.listenPort')"
+        machineName="$(echo $output| jq -r '.machine[1]')"
+        print "machine: $machineName"
+
+        output=$(curl -s \
+        --user ${WLS_USERNAME}:${WLS_PASSWORD} \
+        -H X-Requested-By:MyClient \
+        -H Accept:application/json \
+        -H Content-Type:application/json \
+        -X GET ${HTTP_ADMIN_URL}/management/weblogic/latest/serverConfig/machines/${machineName}/nodeManager)
+
+        print "$output"
 
         print "\n\n\********************************************\n\n"
 
+        serverListenAddress="$(echo $output | jq -r '.listenAddress')"
         print "ServerListenAddress: $serverListenAddress"
         print "ServerListenPort: $serverListenPort"
 
@@ -389,6 +400,7 @@ getClusterName
 testAppDeployment
 
 testDeployedAppHTTP
+exit 0
 
 shutdownAllServers
 
@@ -403,3 +415,4 @@ sleep 30s
 testManagedServerStatus "RUNNING"
 
 printTestSummary
+

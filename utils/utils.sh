@@ -38,6 +38,7 @@ get_param()
     do
         case $1 in
          -i         )  INPUT_FILE=$2 ;;
+         -r         )  RG_NAME=$2;;
                    *)  echo 'invalid arguments specified'
                        usage;;
         esac
@@ -57,6 +58,11 @@ validate_input()
     then
         echo "Provided input file ${INPUT_FILE} not found"
         exit 1
+    fi
+
+    if [[ -z "$RG_NAME" ]];
+    then
+        echo "command input RG_NAME not provided"
     fi
 
     echo "Using input file $INPUT_FILE"

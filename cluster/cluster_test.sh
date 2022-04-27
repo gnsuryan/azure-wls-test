@@ -400,7 +400,6 @@ getClusterName
 testAppDeployment
 
 testDeployedAppHTTP
-exit 0
 
 shutdownAllServers
 

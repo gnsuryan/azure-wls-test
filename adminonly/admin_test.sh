@@ -102,9 +102,14 @@ function testServerStatus()
 
 function testAppDeployment()
 {
+
+    mkdir -p /tmp/deploy
+    cp ${SHOPPING_CART_APP_PATH} /tmp/deploy/
+    chown -R oracle:oracle /tmp/deploy
+
     startTest
 
-    output=$(curl -s -v \
+    output=$(curl -s \
     --user ${WLS_USERNAME}:${WLS_PASSWORD} \
     -H X-Requested-By:MyClient \
     -H Accept:application/json \
@@ -112,18 +117,17 @@ function testAppDeployment()
 
     adminServerName=$(echo $output | jq -r --arg ADMIN_NAME "$ADMIN_SERVER_NAME" '.items[]|select(.name | test($ADMIN_NAME;"i")) | .name ')
 
-    print "Deploying to: $adminServerName"
-    print "DEPLOY_APP_PATH: $DEPLOY_APP_PATH"
+    print "adminServerName $adminServerName"
 
-    retcode=$(curl -v -s \
+    retcode=$(curl -s \
             --user ${WLS_USERNAME}:${WLS_PASSWORD} \
             -H X-Requested-By:MyClient \
             -H Accept:application/json \
             -H Content-Type:application/json \
             -d "{
                 name: '${SHOPPING_CART_APP_NAME}',
-                deploymentPath: '${SHOPPING_CART_APP_PATH}',
-                targets: [ '${adminServerName}' ]
+                deploymentPath: '/tmp/deploy/${SHOPPING_DEPLOY_APP}',
+                targets:    [ '${adminServerName}' ]
             }" \
             -X POST ${HTTP_ADMIN_URL}/management/wls/latest/deployments/application)
 
@@ -139,14 +143,13 @@ function testAppDeployment()
         echo "SUCCESS - App Deployed Successfully. Deployment Status: ${deploymentStatus}"
         notifyPass
     fi
+    rm -rf /tmp/deploy
+
+    print "Wait for 15 seconds for the deployed Apps to become available..."
+    sleep 15s
 
     endTest
-
-    print "Wait for 30 seconds for the deployed Apps to become available..."
-    sleep 30s
-
 }
-
 
 function testDeployedAppHTTP()
 {

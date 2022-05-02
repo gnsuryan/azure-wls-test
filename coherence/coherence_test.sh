@@ -21,16 +21,16 @@ function verifyCoherenceCluster()
     coherenceClusterName=$(echo $output | jq -r '.items[].clusterName')
 
     print "coherence Cluster Name: $coherenceClusterName"
-   
-    if [ "$coherenceClusterName" != "${COHERENCE_CLUSTER_NAME}" ]; 
+
+    if [ "$coherenceClusterName" != "${COHERENCE_CLUSTER_NAME}" ];
     then
-        echo "FAILURE - Coherence Cluster verification failed"
+        echo "FAILURE - Coherence Cluster name verification failed"
         notifyFail
     else
-        echo "SUCCESS - Coherence Cluster verification is successful."
+        echo "SUCCESS - Coherence Cluster name verification is successful."
         notifyPass
     fi
- 
+
     coherenceClusterStatus=$(echo $output | jq -r '.items[].running')
 
     if [ "$coherenceClusterStatus" != "true" ];
@@ -72,7 +72,7 @@ function verifyCoherenceCluster()
     failed=false
 
     for ((i=1;i<=DEFAULT_CLUSTER_SIZE;i++));
-    do 
+    do
        expectedMemberId="${MANAGED_SERVER_PREFIX}${i}";
 
        if printf '%s\n' ${clusterMembers[@]} | grep -q -P "^${expectedMemberId}$"; then
@@ -118,4 +118,3 @@ validate_input
 verifyCoherenceCluster
 
 printTestSummary
-
